@@ -3,7 +3,7 @@ Mid Project Review
 
 ## Current Progress
 
-A website has been made outlining the high-level overview of our project. A checklist for
+A website has been made outlining the high-level overview of our project, found [here](https://toshipiazza.github.io/LLVMCFG/). A checklist for
 the deliverables for our project include:
 
 - [ ] construct a basic block pass which instruments each conditional branch  

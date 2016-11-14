@@ -34,25 +34,6 @@
 <p>LLVMCFG is an llvm pass that modifies the code generation phase of the clang compiler. Given some source code, the generated code will keep track of all branches taken at runtime, and outputs a dynamically computed control flow graph. This project was inspired by the <code>cbr.c</code> and <code>cbrtrace.c</code> samples in the DynamoRIO code base which compute the control flow dynamically using dynamic binary instrumentation.</p>
 
 <h1>
-<a id="implementation" class="anchor" href="#implementation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Implementation</h1>
-
-<p>We are mainly targeting dynamically computed control flow instructions, for example conditional branches. We will transform an llvm IR control flow instruction into the following instrumentation:</p>
-
-<div class="highlight highlight-source-assembly"><pre><span class="pl-en">  cbr label</span>
-
-<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> __at_not_taken(src</span><span class="pl-s1">,</span><span class="pl-en"> fall)</span>
-<span class="pl-en">  </span><span class="pl-k">jmp</span><span class="pl-en"> fallthrough</span>
-
-<span class="pl-en">label:</span>
-<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> __at_token(src</span><span class="pl-s1">,</span><span class="pl-en"> targ)</span>
-<span class="pl-en">  </span><span class="pl-k">jmp</span><span class="pl-en"> target</span>
-
-<span class="pl-en">fallthrough:</span>
-<span class="pl-en">  ...</span></pre></div>
-
-<p>Here, we clobber the original cbr instruction (labeled cbr) and we force it instead to jump to our label. This label was taken, so we know that the original branch would have been taken, and we note it as such (by calling <code>__at_token()</code>. Otherwise, we fell through and called the <code>__at_not_token()</code>. In this manner we build up the dynamic control flow graph and dump it to a file.</p>
-
-<h1>
 <a id="applications" class="anchor" href="#applications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Applications</h1>
 
 <h2>

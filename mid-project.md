@@ -30,7 +30,7 @@ phase.
 
 ## Demo of Current Progress
 
-[![asciicast](https://asciinema.org/a/4j1sy894bgqy7wvtcu83zj8hy.png)](https://asciinema.org/a/4j1sy894bgqy7wvtcu83zj8hy)
+[![asciicast](https://asciinema.org/a/cv66htahirf47836pdal1w7a7.png)](https://asciinema.org/a/cv66htahirf47836pdal1w7a7)
 
 Here, we run our `runpass.sh` script which runs our pass on the test.c file,
 which has a conditional. It simply victimizes this conditional and points the

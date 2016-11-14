@@ -28,12 +28,16 @@
         </ul>
       </header>
       <section>
-        <h6>
+        <h1>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h1>
+
+<h6>
 <a id="notice-this-project-is-wip" class="anchor" href="#notice-this-project-is-wip" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notice, this project is WIP</h6>
 
 <p>LLVMCFG is an llvm pass that modifies the code generation phase of the clang compiler. Given some source code, the generated code will keep track of all branches taken at runtime, and outputs a dynamically computed control flow graph. This project was inspired by the <code>cbr.c</code> and <code>cbrtrace.c</code> samples in the DynamoRIO code base which compute the control flow dynamically using dynamic binary instrumentation.</p>
 
-<p>Implementation</p>
+<h1>
+<a id="implementation" class="anchor" href="#implementation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Implementation</h1>
 
 <p>In order to compute the dynamic control flow graph, we must specifically target conditional branch instructions:</p>
 

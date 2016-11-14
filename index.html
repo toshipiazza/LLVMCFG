@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>LLVMCFG by toshipiazza</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>LLVMCFG</h1>
+        <p>LLVM Pass for dynamic CFG generation</p>
+
+        <p class="view"><a href="https://github.com/toshipiazza/LLVMCFG">View the Project on GitHub <small>toshipiazza/LLVMCFG</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/toshipiazza/LLVMCFG/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/toshipiazza/LLVMCFG/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/toshipiazza/LLVMCFG">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h6>
+<a id="notice-this-project-is-wip" class="anchor" href="#notice-this-project-is-wip" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notice, this project is WIP</h6>
+
+<p>LLVMCFG is an llvm pass that modifies the code generation phase of the clang compiler. Given some source code, the generated code will keep track of all branches taken at runtime, and outputs a dynamically computed control flow graph.</p>
+
+<h1>
+<a id="applications" class="anchor" href="#applications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Applications</h1>
+
+<h2>
+<a id="branch-coverage" class="anchor" href="#branch-coverage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Branch Coverage</h2>
+
+<p>Once we have constructed the dynamically computed CFG, we can "diff" this against a more complete, statically computed control flow graph in order to determine which branches were not taken at runtime.</p>
+
+<h2>
+<a id="static-analysis-aide" class="anchor" href="#static-analysis-aide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Static Analysis Aide</h2>
+
+<p>Sometimes certain static analysis tools like IDA and radare2 will miss certain dynamic control flow instructions (<code>[call|jmp] rax</code>) as they are computationally hard to determine statically. Examples of these include switch-case statements and jump tables. Given a "good" execution of a program, we can likely reconstruct a good portion of the switch-case statement very simply.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/toshipiazza">toshipiazza</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>

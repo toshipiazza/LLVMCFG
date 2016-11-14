@@ -22,4 +22,3 @@ namespace {
 
 char CFG::ID = 0;
 static RegisterPass<CFG> X("cfg", "Control Flow Graph Pass");
-// vim:tabstop=2:set shiftwidth=2:

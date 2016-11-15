@@ -19,14 +19,17 @@ is able to accurately instrument each conditional branch and modify its target
 and fallthrough branches. The stdlibc++ functionality has not been written that
 will be our trampolines for keeping track of the branches, but is underway.
 Once these have been completed, the python scripts will be written augmenting
-IDA's current funcionality.
+IDA's current functionality. The python script for coloring branches should be 
+relatively trivial in IDAPython but the updating IDA's existing CFG is quite ambitious.
+There is precedent for modifying CFG using IDAPython but most open source options rely
+on an external format to represent the CFG. More research is required to determine feasability in our timeframe.
 
 ## Delegation of Work
 
 Toshi will work on the basic block pass. Kevin will construct the `__taken()`
 and `__not_taken()` functions into libstdc++. Max will build a python script
-that reads in the expected json, and augments IDA's control flow generation
-phase.
+that reads in the expected json, colors the basic blocks which were taken and
+the basic blocks which were ignored, and augments IDA's control flow generation phase.
 
 ## Demo of Current Progress
 
@@ -36,4 +39,6 @@ Here, we run our `runpass.sh` script which runs our pass on the test.c file,
 which has a conditional. It simply victimizes this conditional and points the
 taken branch to `cfg::taken`, and the not-taken branch to `cfg::not_taken`.
 Next, we will fill in these stub basic blocks with clean calls which will
-notify some global state that a branch has been taken or not.
+notify some global state that a branch has been taken or not. It should be noted
+that this demo does not deal with the taken / nottaken functionality of the compilation
+of the json metadata.

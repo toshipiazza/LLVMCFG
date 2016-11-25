@@ -17,3 +17,22 @@ $ cd llvm/lib/Transforms/
 $ git clone https://github.com/toshipiazza/LLVMCFG.git CFG
 $ echo "add_subdirectory(CFG)" >> CMakeLists.txt
 ```
+
+## How to Use
+
+``` {bash}
+#!/usr/bin/env bash
+# runpass.sh
+
+# compile the CMake project
+set -e
+make -j LLVMCFG
+
+# copy the branch library over
+cp /path/to/cfg/libbranch/libbranch.so .
+
+# compile the source tode into test.bc, and then run our pass on it
+clang++ -g emit-llvm -c $@ -o test.bc
+opt -load ./lib/LLVMCFG.so -cfg < test.bc > test-out.bc
+clang++ scratch/test-out.bc -i test-out.out -L . -lbranch -pthread # our pass requires these libs
+```

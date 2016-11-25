@@ -4,56 +4,52 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Constants.h"
 
 
 using namespace llvm;
 
 namespace {
 
-  BasicBlock *make_taken_branch(BranchInst &BI)
-  {
-      auto taken = BasicBlock::Create(BI.getContext(),
-          "cfg::taken", BI.getFunction());
-      IRBuilder<> taken_builder(taken);
-
-      // TODO: call clean call
-      // create unconditional jump to original target
-      taken_builder.CreateBr(cast<BasicBlock>(BI.getOperand(2)));
-
-      return taken;
+  void CreateCall(ArrayRef<Value *> args, BranchInst &BI, Instruction *before) {
+    auto &context = BI.getContext();
+    auto func = BI.getModule()->getOrInsertFunction("__note_taken",
+                                                    Type::getVoidTy(context),
+                                                    Type::getInt8PtrTy(context),
+                                                    Type::getInt8PtrTy(context),
+                                                    nullptr);
+    CallInst::Create(func, args, "", before);
   }
 
-  BasicBlock *make_not_taken_branch(BranchInst &BI)
-  {
-      auto not_taken = BasicBlock::Create(BI.getContext(),
-          "cfg::not_taken", BI.getFunction());
-      IRBuilder<> not_taken_builder(not_taken);
 
-      // TODO: call clean call
-      // create unconditional jump to original fallthrough
-      not_taken_builder.CreateBr(cast<BasicBlock>(BI.getOperand(1)));
-      return not_taken;
+  void InstrumentBranch(BranchInst &BI, int idx) {
+    auto targ = dyn_cast<BasicBlock>(BI.getOperand(idx));
+    auto bb = BI.getParent();
+    if (&bb->getParent()->getEntryBlock() != BI.getParent()) {
+      Value *args[] = 
+        { BlockAddress::get(bb),
+          BlockAddress::get(targ) };
+      CreateCall(args, BI, targ->getFirstNonPHIOrDbgOrLifetime());
+    } else {
+      // we cannot take the BlockAddress of this instruction...
+      // so we must get a pointer to the function itself
+      // TODO
+    }
   }
+
 
   struct CBRVisitor :
       public InstVisitor<CBRVisitor> {
     bool changed = false;
     void visitBranchInst(BranchInst &BI) {
       if (BI.isConditional()) {
-        // victimize the true and false branches
-        errs() << "Found conditional branch " << BI << "\n";
- 
-        // use IRBuilder to create two new basic blocks
-        auto taken = make_taken_branch(BI);
-        auto not_taken = make_not_taken_branch(BI);
-
-        // hook up original branch instruction to our new branches
-        BI.setOperand(2, taken);
-        BI.setOperand(1, not_taken);
+        InstrumentBranch(BI, 2);
+        InstrumentBranch(BI, 1);
         changed = true;
       }
     }
   };
+
 
   struct CFG : public BasicBlockPass {
     static char ID;

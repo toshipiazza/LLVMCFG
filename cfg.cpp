@@ -11,29 +11,29 @@ using namespace llvm;
 
 namespace {
 
-  void CreateCall(ArrayRef<Value *> args, BranchInst &BI, Instruction *before) {
+  void InstrumentBranch(BranchInst &BI, int idx) {
     auto &context = BI.getContext();
+    auto targ = dyn_cast<BasicBlock>(BI.getOperand(idx));
+    auto bb = BI.getParent();
     auto func = BI.getModule()->getOrInsertFunction("__note_taken",
                                                     Type::getVoidTy(context),
                                                     Type::getInt8PtrTy(context),
                                                     Type::getInt8PtrTy(context),
                                                     nullptr);
-    CallInst::Create(func, args, "", before);
-  }
-
-
-  void InstrumentBranch(BranchInst &BI, int idx) {
-    auto targ = dyn_cast<BasicBlock>(BI.getOperand(idx));
-    auto bb = BI.getParent();
     if (&bb->getParent()->getEntryBlock() != BI.getParent()) {
       Value *args[] = 
         { BlockAddress::get(bb),
           BlockAddress::get(targ) };
-      CreateCall(args, BI, targ->getFirstNonPHIOrDbgOrLifetime());
+      CallInst::Create(func, args, "", targ->getFirstNonPHIOrDbgOrLifetime());
     } else {
       // we cannot take the BlockAddress of this instruction...
       // so we must get a pointer to the function itself
-      // TODO
+      auto entry = ConstantExpr::getBitCast(BI.getParent()->getParent(),
+          PointerType::get(Type::getInt8Ty(context), 0));
+      Value *args[] = 
+        { entry,
+          BlockAddress::get(targ) };
+      CallInst::Create(func, args, "", targ->getFirstNonPHIOrDbgOrLifetime());
     }
   }
 

@@ -41,25 +41,27 @@
 
 <p>In order to compute the dynamic control flow graph, we must specifically target conditional branch instructions:</p>
 
-<div class="highlight highlight-source-assembly"><pre><span class="pl-en">  br i1 %</span><span class="pl-c1">1</span><span class="pl-en"> %</span><span class="pl-c1">2</span><span class="pl-en"> %</span><span class="pl-c1">3</span>
-
-<span class="pl-c">; &lt;label&gt;2:</span>
-<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> void @__branch_taken(i32 </span><span class="pl-s1">*</span><span class="pl-en">src</span><span class="pl-s1">,</span><span class="pl-en"> i32 </span><span class="pl-s1">*</span><span class="pl-en">targ)</span>
-<span class="pl-en">  br %</span><span class="pl-c1">4</span>
+<div class="highlight highlight-source-assembly"><pre><span class="pl-c">; &lt;label&gt;1:</span>
+<span class="pl-c">  ; ...</span>
+<span class="pl-en">  br i1 %</span><span class="pl-c1">2</span><span class="pl-en"> %</span><span class="pl-c1">3</span><span class="pl-en"> %</span><span class="pl-c1">4</span>
 
 <span class="pl-c">; &lt;label&gt;3:</span>
-<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> void @__branch_not_taken(i32 </span><span class="pl-s1">*</span><span class="pl-en">src</span><span class="pl-s1">,</span><span class="pl-en"> i32 </span><span class="pl-s1">*</span><span class="pl-en">fall)</span>
-<span class="pl-en">  br %</span><span class="pl-c1">5</span>
+<span class="pl-c">  ; skip all phi nodes, etc</span>
+<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> void @__note_taken(i8</span><span class="pl-s1">*</span><span class="pl-en"> blockaddress(@main</span><span class="pl-s1">,</span><span class="pl-en"> %</span><span class="pl-c1">1</span><span class="pl-en">)</span><span class="pl-s1">,</span><span class="pl-en"> i8</span><span class="pl-s1">*</span><span class="pl-en"> blockaddress(@main</span><span class="pl-s1">,</span><span class="pl-en"> %</span><span class="pl-c1">3</span><span class="pl-en">))</span>
+<span class="pl-c">  ; original fallthrough instrumentation</span>
 
 <span class="pl-c">; &lt;label&gt;4:</span>
-<span class="pl-c">  ; original target branch</span>
-<span class="pl-c">  ; ...</span>
+<span class="pl-c">  ; skip all phi nodes, etc</span>
+<span class="pl-en">  </span><span class="pl-k">call</span><span class="pl-en"> void @__note_taken(i8</span><span class="pl-s1">*</span><span class="pl-en"> blockaddress(@main</span><span class="pl-s1">,</span><span class="pl-en"> %</span><span class="pl-c1">1</span><span class="pl-en">)</span><span class="pl-s1">,</span><span class="pl-en"> i8</span><span class="pl-s1">*</span><span class="pl-en"> blockaddress(@main</span><span class="pl-s1">,</span><span class="pl-en"> %</span><span class="pl-c1">4</span><span class="pl-en">))</span>
+<span class="pl-c">  ; original target instrumentation</span></pre></div>
 
-<span class="pl-c">; &lt;label&gt;5:</span>
-<span class="pl-c">  ; original fallthrough branch</span>
-<span class="pl-c">  ; ...</span></pre></div>
+<p>Here, given a conditional branch instruction we find the fallthrough basic block and the taken basic block, and we add a call to <code>__note_taken()</code>, which keeps state. We use the <code>blockaddress()</code> mechanism for the general case to get the addresses of basic blocks.</p>
 
-<p>Here, we victimize the conditional branch instruction to jump either to our branch_taken label or to our branch_not_taken label (labels <code>%2</code> and <code>%3</code>, respectively). If we took the true branch, we notify accordingly by calling <code>__branch_taken()</code>, and if we took the false branch we call <code>__branch_not_taken()</code>. In this manner we can compute the control graph dynamically.</p>
+<p>Note that <code>blockaddress(entry)</code> cannot be taken; that is, we cannot take the address of a basic block which serves as the entry point to a function. So, we use the alternative IR:</p>
+
+<div class="highlight highlight-source-assembly"><pre><span class="pl-k">call</span><span class="pl-en"> void @__note_taken(i8</span><span class="pl-s1">*</span><span class="pl-en"> bitcast (i32 ()</span><span class="pl-s1">*</span><span class="pl-en"> @main to i8</span><span class="pl-s1">*</span><span class="pl-en">)</span><span class="pl-s1">,</span><span class="pl-en"> i8</span><span class="pl-s1">*</span><span class="pl-en"> blockaddress(@main</span><span class="pl-s1">,</span><span class="pl-en"> %</span><span class="pl-c1">3</span><span class="pl-en">))</span></pre></div>
+
+<p>Here, we take the address of main (and thus of the entry basic block), and cast it to a <code>void *</code> to be used as the argument to <code>__note_taken()</code>.</p>
 
 <h1>
 <a id="applications" class="anchor" href="#applications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Applications</h1>
